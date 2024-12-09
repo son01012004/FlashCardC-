@@ -12,6 +12,8 @@ namespace FlashCard.View.TrangChu
         private List<string> topics; // Danh sách chủ đề
         private int currentQuestionIndex = 0;
         private bool isMultipleChoiceSelected = true; // Trạng thái kiểm tra loại câu hỏi
+        private int correctAnswersCount = 0; // Số câu trả lời đúng
+        private int wrongAnswersCount = 0; // Số câu trả lời sai
 
         public Kiemtra()
         {
@@ -63,6 +65,21 @@ namespace FlashCard.View.TrangChu
                 IsFillInTheBlank = false // Câu hỏi trắc nghiệm
             });
 
+            allQuestions.Add(new Question
+            {
+                Text = "What is the largest animal in the ocean?",
+                AnswerChoices = new List<string>
+                {
+                    "Blue whale",
+                    "Shark",
+                    "Dolphin",
+                    "Octopus"
+                },
+                CorrectAnswer = "Blue whale",
+                Topic = "Nature",
+                IsFillInTheBlank = false // Câu hỏi trắc nghiệm
+            });
+
             // Chủ đề Science
             allQuestions.Add(new Question
             {
@@ -71,6 +88,21 @@ namespace FlashCard.View.TrangChu
                 CorrectAnswer = "solar system", // Đáp án điền từ
                 Topic = "Science",
                 IsFillInTheBlank = true // Câu hỏi điền từ
+            });
+
+            allQuestions.Add(new Question
+            {
+                Text = "What is the chemical symbol for water?",
+                AnswerChoices = new List<string>
+                {
+                    "H2O",
+                    "CO2",
+                    "O2",
+                    "N2"
+                },
+                CorrectAnswer = "H2O",
+                Topic = "Science",
+                IsFillInTheBlank = false // Câu hỏi trắc nghiệm
             });
 
             // Chủ đề History
@@ -89,6 +121,21 @@ namespace FlashCard.View.TrangChu
                 IsFillInTheBlank = false
             });
 
+            allQuestions.Add(new Question
+            {
+                Text = "In which year did World War II end?",
+                AnswerChoices = new List<string>
+                {
+                    "1945",
+                    "1939",
+                    "1965",
+                    "1918"
+                },
+                CorrectAnswer = "1945",
+                Topic = "History",
+                IsFillInTheBlank = false
+            });
+
             // Chủ đề Technology
             allQuestions.Add(new Question
             {
@@ -101,6 +148,21 @@ namespace FlashCard.View.TrangChu
                     "A type of operating system."
                 },
                 CorrectAnswer = "A mobile phone with advanced features like internet access.",
+                Topic = "Technology",
+                IsFillInTheBlank = false
+            });
+
+            allQuestions.Add(new Question
+            {
+                Text = "Who developed the first computer mouse?",
+                AnswerChoices = new List<string>
+                {
+                    "Douglas Engelbart",
+                    "Bill Gates",
+                    "Steve Jobs",
+                    "Mark Zuckerberg"
+                },
+                CorrectAnswer = "Douglas Engelbart",
                 Topic = "Technology",
                 IsFillInTheBlank = false
             });
@@ -144,7 +206,7 @@ namespace FlashCard.View.TrangChu
             if (filteredQuestions.Count == 0) return;
 
             var question = filteredQuestions[currentQuestionIndex];
-            lblQuestion.Text = question.Text;
+            lblQuestion.Text = $"{currentQuestionIndex + 1}/{filteredQuestions.Count} - {question.Text}"; // Hiển thị số câu hỏi
 
             if (question.IsFillInTheBlank)
             {
@@ -202,11 +264,13 @@ namespace FlashCard.View.TrangChu
             {
                 lblResult.Text = "Đúng!";
                 lblResult.ForeColor = System.Drawing.Color.Green; // Hiển thị kết quả đúng
+                correctAnswersCount++;
             }
             else
             {
                 lblResult.Text = "Sai! Đáp án đúng là: " + question.CorrectAnswer;
                 lblResult.ForeColor = System.Drawing.Color.Red; // Hiển thị kết quả sai và đáp án đúng
+                wrongAnswersCount++;
             }
         }
 
@@ -238,7 +302,9 @@ namespace FlashCard.View.TrangChu
             }
             else
             {
-                MessageBox.Show("Bạn đã hoàn thành bài kiểm tra!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show($"Bài kiểm tra đã hoàn thành! Bạn đã trả lời đúng {correctAnswersCount} câu và sai {wrongAnswersCount} câu.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                correctAnswersCount = 0;
+                wrongAnswersCount = 0;
                 currentQuestionIndex = 0;
                 LoadQuestion();
             }

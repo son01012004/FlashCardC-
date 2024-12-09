@@ -268,16 +268,32 @@
         private void rdoMixed_CheckedChanged(object sender, EventArgs e)
         {
             // Logic xử lý khi radio button 'Tổng hợp' thay đổi
+            if (rdoMixed.Checked)
+            {
+                isMultipleChoiceSelected = true; // Chọn chế độ trắc nghiệm mặc định
+                FilterQuestionsByTopics(); // Lọc câu hỏi khi chọn chế độ 'Tổng hợp'
+            }
         }
 
         private void rdoFillInTheBlank_CheckedChanged(object sender, EventArgs e)
         {
             // Logic xử lý khi radio button 'Điền từ' thay đổi
+            if (rdoFillInTheBlank.Checked)
+            {
+                isMultipleChoiceSelected = false; // Chọn chế độ điền từ
+                FilterQuestionsByTopics(); // Lọc câu hỏi khi chọn chế độ 'Điền từ'
+            }
         }
 
         private void rdoMultipleChoice_CheckedChanged(object sender, EventArgs e)
         {
             // Logic xử lý khi radio button 'Trắc nghiệm' thay đổi
+            if (rdoMultipleChoice.Checked)
+            {
+                isMultipleChoiceSelected = true; // Chọn chế độ trắc nghiệm
+                FilterQuestionsByTopics(); // Lọc câu hỏi khi chọn chế độ 'Trắc nghiệm'
+            }
         }
+
     }
 }
