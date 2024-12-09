@@ -22,7 +22,7 @@ namespace FlashCard.View.TrangChu
             pagE11.Size = new Size(960, 473);
             Controls.Add(pagE11);
 
-            
+
 
             SildePanel.Height = button1.Height;
             SildePanel.Top = button1.Top;
@@ -36,7 +36,7 @@ namespace FlashCard.View.TrangChu
             }
 
             this.notifyIcon1.MouseDoubleClick += new MouseEventHandler(this.notifyIcon1_MouseDoubleClick);
-            
+
         }
 
         protected override void OnLoad(EventArgs e)
@@ -150,6 +150,13 @@ namespace FlashCard.View.TrangChu
         private void button7_Click(object sender, EventArgs e)
         {
 
+        }
+
+        private void Kiemtra_Click(object sender, EventArgs e)
+        {
+            SildePanel.Height = Kiemtra.Height;
+            SildePanel.Top = Kiemtra.Top;
+            kiemtra1.BringToFront();
         }
     }
 }
