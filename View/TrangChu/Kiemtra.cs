@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -12,6 +11,7 @@ namespace FlashCard.View.TrangChu
         private List<Question> filteredQuestions; // Danh sách câu hỏi đã lọc
         private List<string> topics; // Danh sách chủ đề
         private int currentQuestionIndex = 0;
+        private bool isMultipleChoiceSelected = true; // Trạng thái kiểm tra loại câu hỏi
 
         public Kiemtra()
         {
@@ -21,11 +21,6 @@ namespace FlashCard.View.TrangChu
             topics = new List<string>();
             LoadTopics(); // Tải chủ đề mẫu
             LoadQuestions(); // Tải câu hỏi
-
-            // Đăng ký sự kiện cho các RadioButton
-            rdoMultipleChoice.CheckedChanged += rdoMultipleChoice_CheckedChanged;
-            rdoFillInTheBlank.CheckedChanged += rdoFillInTheBlank_CheckedChanged;
-            rdoMixed.CheckedChanged += rdoMixed_CheckedChanged;
         }
 
         // Hàm để tải chủ đề
@@ -40,124 +35,202 @@ namespace FlashCard.View.TrangChu
             {
                 clbTopics.Items.Add(topic);
             }
+
+            // Sự kiện khi chọn thay đổi trong CheckedListBox
+            clbTopics.ItemCheck += (s, e) =>
+            {
+                // Lọc câu hỏi sau khi người dùng thay đổi lựa chọn
+                BeginInvoke(new Action(FilterQuestionsByTopics));
+            };
         }
 
         // Hàm để tải câu hỏi
         private void LoadQuestions()
         {
+            // Chủ đề Nature
             allQuestions.Add(new Question
             {
                 Text = "What is the ocean?",
                 AnswerChoices = new List<string>
                 {
-                    "The quality of continuing steadily despite difficulties.",
                     "A vast body of salt water that covers most of the earth.",
-                    "A shape with three sides and three angles.",
-                    "A two-wheeled vehicle powered by pedaling."
+                    "A desert landscape.",
+                    "A form of weather.",
+                    "A mountain peak."
                 },
                 CorrectAnswer = "A vast body of salt water that covers most of the earth.",
-                Topic = "Nature"
+                Topic = "Nature",
+                IsFillInTheBlank = false // Câu hỏi trắc nghiệm
             });
 
+            // Chủ đề Science
             allQuestions.Add(new Question
             {
-                Text = "What is a computer?",
-                AnswerChoices = new List<string>
-                {
-                    "A device used to process data.",
-                    "An animal living in the wild.",
-                    "A large landmass on Earth.",
-                    "A type of historical document."
-                },
-                CorrectAnswer = "A device used to process data.",
-                Topic = "Technology"
+                Text = "The sun is the center of our _________.",
+                AnswerChoices = new List<string>(), // Không có lựa chọn trắc nghiệm
+                CorrectAnswer = "solar system", // Đáp án điền từ
+                Topic = "Science",
+                IsFillInTheBlank = true // Câu hỏi điền từ
             });
 
+            // Chủ đề History
+            allQuestions.Add(new Question
+            {
+                Text = "Who was the first president of the USA?",
+                AnswerChoices = new List<string>
+                {
+                    "George Washington.",
+                    "Abraham Lincoln.",
+                    "Thomas Jefferson.",
+                    "John Adams."
+                },
+                CorrectAnswer = "George Washington.",
+                Topic = "History",
+                IsFillInTheBlank = false
+            });
+
+            // Chủ đề Technology
+            allQuestions.Add(new Question
+            {
+                Text = "What is a smartphone?",
+                AnswerChoices = new List<string>
+                {
+                    "A mobile phone with advanced features like internet access.",
+                    "A type of computer.",
+                    "A new programming language.",
+                    "A type of operating system."
+                },
+                CorrectAnswer = "A mobile phone with advanced features like internet access.",
+                Topic = "Technology",
+                IsFillInTheBlank = false
+            });
+
+            // Lọc câu hỏi mặc định (hiển thị tất cả)
             filteredQuestions = allQuestions;
             LoadQuestion();
         }
 
-        // Hàm hiển thị câu hỏi trắc nghiệm
-        private void LoadMultipleChoiceQuestion()
+        // Lọc câu hỏi theo chủ đề và loại kiểm tra
+        private void FilterQuestionsByTopics()
         {
-            if (filteredQuestions.Count == 0) return;
+            var selectedTopics = clbTopics.CheckedItems.Cast<string>().ToList();
 
-            var question = filteredQuestions[currentQuestionIndex];
-            lblQuestion.Text = question.Text;
-
-            rdoAnswer1.Visible = true;
-            rdoAnswer2.Visible = true;
-            rdoAnswer3.Visible = true;
-            rdoAnswer4.Visible = true;
-
-            rdoAnswer1.Text = question.AnswerChoices[0];
-            rdoAnswer2.Text = question.AnswerChoices[1];
-            rdoAnswer3.Text = question.AnswerChoices[2];
-            rdoAnswer4.Text = question.AnswerChoices[3];
-
-            lblResult.Text = "";
-        }
-
-        // Hàm hiển thị câu hỏi điền từ
-        private void LoadFillInTheBlankQuestion()
-        {
-            if (filteredQuestions.Count == 0) return;
-
-            var question = filteredQuestions[currentQuestionIndex];
-            lblQuestion.Text = question.Text;
-
-            rdoAnswer1.Visible = false;
-            rdoAnswer2.Visible = false;
-            rdoAnswer3.Visible = false;
-            rdoAnswer4.Visible = false;
-
-            txtAnswer.Visible = true; // Hiển thị TextBox để nhập câu trả lời
-            lblResult.Text = "";
-        }
-
-        // Hàm hiển thị câu hỏi
-        private void LoadQuestion()
-        {
-            if (rdoMultipleChoice.Checked)
+            if (!selectedTopics.Any())
             {
-                LoadMultipleChoiceQuestion();
-            }
-            else if (rdoFillInTheBlank.Checked)
-            {
-                LoadFillInTheBlankQuestion();
-            }
-            // Nếu là chế độ tổng hợp, bạn có thể tùy chỉnh theo yêu cầu
-        }
-
-        private void btnCheck_Click(object sender, EventArgs e)
-        {
-            var question = filteredQuestions[currentQuestionIndex];
-            string selectedAnswer = "";
-
-            if (rdoMultipleChoice.Checked)
-            {
-                if (rdoAnswer1.Checked) selectedAnswer = rdoAnswer1.Text;
-                else if (rdoAnswer2.Checked) selectedAnswer = rdoAnswer2.Text;
-                else if (rdoAnswer3.Checked) selectedAnswer = rdoAnswer3.Text;
-                else if (rdoAnswer4.Checked) selectedAnswer = rdoAnswer4.Text;
-            }
-            else if (rdoFillInTheBlank.Checked)
-            {
-                selectedAnswer = txtAnswer.Text.Trim();
+                MessageBox.Show("Bạn cần chọn ít nhất một chủ đề để tiếp tục.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
             }
 
-            if (selectedAnswer == question.CorrectAnswer)
+            // Lọc câu hỏi theo chủ đề và loại câu hỏi
+            filteredQuestions = allQuestions
+                .Where(q => selectedTopics.Contains(q.Topic) &&
+                            (q.IsFillInTheBlank == !isMultipleChoiceSelected || q.IsFillInTheBlank == isMultipleChoiceSelected))
+                .ToList();
+
+            if (filteredQuestions.Any())
             {
-                lblResult.Text = "Đúng!";
+                currentQuestionIndex = 0;
+                LoadQuestion();
             }
             else
             {
-                lblResult.Text = "Sai rồi!";
+                MessageBox.Show("No questions match the selected topics and type.", "Warning", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
+        }
+
+        // Hiển thị câu hỏi hiện tại
+        private void LoadQuestion()
+        {
+            if (filteredQuestions.Count == 0) return;
+
+            var question = filteredQuestions[currentQuestionIndex];
+            lblQuestion.Text = question.Text;
+
+            if (question.IsFillInTheBlank)
+            {
+                // Hiển thị câu hỏi điền từ
+                rdoAnswer1.Visible = rdoAnswer2.Visible = rdoAnswer3.Visible = rdoAnswer4.Visible = false;
+                txtAnswer.Visible = true; // Hiển thị TextBox để người dùng điền đáp án
+            }
+            else
+            {
+                // Hiển thị câu hỏi trắc nghiệm
+                rdoAnswer1.Text = question.AnswerChoices[0];
+                rdoAnswer2.Text = question.AnswerChoices[1];
+                rdoAnswer3.Text = question.AnswerChoices[2];
+                rdoAnswer4.Text = question.AnswerChoices[3];
+
+                rdoAnswer1.Visible = rdoAnswer2.Visible = rdoAnswer3.Visible = rdoAnswer4.Visible = true;
+                txtAnswer.Visible = false;
+            }
+
+            lblResult.Text = ""; // Xóa kết quả trước khi hiển thị câu hỏi mới
+
+            // Xóa lựa chọn cũ
+            rdoAnswer1.Checked = rdoAnswer2.Checked = rdoAnswer3.Checked = rdoAnswer4.Checked = false;
+            txtAnswer.Text = ""; // Xóa văn bản trong TextBox
+        }
+
+        // Kiểm tra câu trả lời sau khi người dùng chọn
+        private void CheckAnswer()
+        {
+            var question = filteredQuestions[currentQuestionIndex];
+            string selectedAnswer = null;
+
+            if (question.IsFillInTheBlank)
+            {
+                selectedAnswer = txtAnswer.Text.Trim();
+            }
+            else
+            {
+                if (rdoAnswer1.Checked) selectedAnswer = rdoAnswer1.Text;
+                if (rdoAnswer2.Checked) selectedAnswer = rdoAnswer2.Text;
+                if (rdoAnswer3.Checked) selectedAnswer = rdoAnswer3.Text;
+                if (rdoAnswer4.Checked) selectedAnswer = rdoAnswer4.Text;
+            }
+
+            // Kiểm tra nếu không có câu trả lời
+            if (string.IsNullOrWhiteSpace(selectedAnswer))
+            {
+                lblResult.Text = "Vui lòng chọn một đáp án!";
+                lblResult.ForeColor = System.Drawing.Color.Orange;
+                return;
+            }
+
+            // Kiểm tra đáp án
+            if (selectedAnswer.Equals(question.CorrectAnswer, StringComparison.OrdinalIgnoreCase))
+            {
+                lblResult.Text = "Đúng!";
+                lblResult.ForeColor = System.Drawing.Color.Green; // Hiển thị kết quả đúng
+            }
+            else
+            {
+                lblResult.Text = "Sai! Đáp án đúng là: " + question.CorrectAnswer;
+                lblResult.ForeColor = System.Drawing.Color.Red; // Hiển thị kết quả sai và đáp án đúng
+            }
+        }
+
+        // Lắng nghe sự kiện khi người dùng chọn một đáp án
+        private void rdoAnswer_CheckedChanged(object sender, EventArgs e)
+        {
+            CheckAnswer(); // Kiểm tra đáp án khi người dùng chọn
+        }
+
+        // Lắng nghe sự kiện khi người dùng điền câu trả lời
+        private void txtAnswer_TextChanged(object sender, EventArgs e)
+        {
+            CheckAnswer(); // Kiểm tra đáp án khi người dùng điền
         }
 
         private void btnNext_Click(object sender, EventArgs e)
         {
+            // Kiểm tra xem người dùng đã chọn đáp án chưa
+            if (!rdoAnswer1.Checked && !rdoAnswer2.Checked && !rdoAnswer3.Checked && !rdoAnswer4.Checked && string.IsNullOrEmpty(txtAnswer.Text.Trim()))
+            {
+                MessageBox.Show("Bạn cần chọn một đáp án hoặc điền câu trả lời trước khi tiếp tục.", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return; // Không chuyển sang câu hỏi tiếp theo nếu chưa chọn đáp án
+            }
+
             currentQuestionIndex++;
             if (currentQuestionIndex < filteredQuestions.Count)
             {
@@ -165,36 +238,25 @@ namespace FlashCard.View.TrangChu
             }
             else
             {
-                MessageBox.Show("Bạn đã hoàn thành bài kiểm tra!");
+                MessageBox.Show("Bạn đã hoàn thành bài kiểm tra!", "Thông báo", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 currentQuestionIndex = 0;
                 LoadQuestion();
             }
         }
 
-        // Sự kiện chuyển sang chế độ Trắc nghiệm
-        private void rdoMultipleChoice_CheckedChanged(object sender, EventArgs e)
+        // Sự kiện khi chọn kiểu câu hỏi
+        private void grpMode_Enter(object sender, EventArgs e)
         {
             if (rdoMultipleChoice.Checked)
             {
-                txtAnswer.Visible = false;
-                LoadMultipleChoiceQuestion();
+                isMultipleChoiceSelected = true;
             }
-        }
-
-        // Sự kiện chuyển sang chế độ Điền từ
-        private void rdoFillInTheBlank_CheckedChanged(object sender, EventArgs e)
-        {
-            if (rdoFillInTheBlank.Checked)
+            else if (rdoFillInTheBlank.Checked)
             {
-                txtAnswer.Visible = true;
-                LoadFillInTheBlankQuestion();
+                isMultipleChoiceSelected = false;
             }
-        }
 
-        // Sự kiện chuyển sang chế độ Tổng hợp
-        private void rdoMixed_CheckedChanged(object sender, EventArgs e)
-        {
-            // Bạn có thể tùy chỉnh chế độ này nếu cần
+            FilterQuestionsByTopics(); // Lọc câu hỏi khi thay đổi kiểu câu hỏi
         }
     }
 
@@ -204,5 +266,6 @@ namespace FlashCard.View.TrangChu
         public List<string> AnswerChoices { get; set; }
         public string CorrectAnswer { get; set; }
         public string Topic { get; set; }
+        public bool IsFillInTheBlank { get; set; } // Thêm thuộc tính kiểm tra loại câu hỏi
     }
 }

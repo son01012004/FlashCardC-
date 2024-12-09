@@ -32,7 +32,7 @@
             rdoMixed = new RadioButton();
             rdoFillInTheBlank = new RadioButton();
             rdoMultipleChoice = new RadioButton();
-            lblWord = new Label();
+            lblQuestion = new Label();
             rdoAnswer1 = new RadioButton();
             rdoAnswer2 = new RadioButton();
             rdoAnswer3 = new RadioButton();
@@ -41,7 +41,6 @@
             progressBar = new ProgressBar();
             lblResult = new Label();
             txtAnswer = new TextBox();
-            lblQuestion = new Label();
             clbTopics = new CheckedListBox();
             rdoAnswer4 = new RadioButton();
             grpMode.SuspendLayout();
@@ -58,6 +57,7 @@
             grpMode.TabIndex = 0;
             grpMode.TabStop = false;
             grpMode.Text = "Chọn chế độ kiểm tra";
+            grpMode.Enter += grpMode_Enter;
             // 
             // rdoMixed
             // 
@@ -95,14 +95,14 @@
             rdoMultipleChoice.UseVisualStyleBackColor = true;
             rdoMultipleChoice.CheckedChanged += rdoMultipleChoice_CheckedChanged;
             // 
-            // lblWord
+            // lblQuestion
             // 
-            lblWord.AutoSize = true;
-            lblWord.Location = new Point(668, 95);
-            lblWord.Name = "lblWord";
-            lblWord.Size = new Size(59, 20);
-            lblWord.TabIndex = 2;
-            lblWord.Text = "Câu hỏi";
+            lblQuestion.AutoSize = true;
+            lblQuestion.Location = new Point(575, 124);
+            lblQuestion.Name = "lblQuestion";
+            lblQuestion.Size = new Size(59, 20);
+            lblQuestion.TabIndex = 2;
+            lblQuestion.Text = "Câu hỏi";
             // 
             // rdoAnswer1
             // 
@@ -162,19 +162,10 @@
             // 
             // txtAnswer
             // 
-            txtAnswer.Location = new Point(550, 160);
+            txtAnswer.Location = new Point(649, 157);
             txtAnswer.Name = "txtAnswer";
             txtAnswer.Size = new Size(200, 27);
             txtAnswer.TabIndex = 12;
-            // 
-            // lblQuestion
-            // 
-            lblQuestion.AutoSize = true;
-            lblQuestion.Location = new Point(550, 120);
-            lblQuestion.Name = "lblQuestion";
-            lblQuestion.Size = new Size(59, 20);
-            lblQuestion.TabIndex = 11;
-            lblQuestion.Text = "Câu hỏi";
             // 
             // clbTopics
             // 
@@ -201,12 +192,11 @@
             Controls.Add(btnNext);
             Controls.Add(btnCheck);
             Controls.Add(txtAnswer);
-            Controls.Add(lblQuestion);
             Controls.Add(rdoAnswer4);
             Controls.Add(rdoAnswer3);
             Controls.Add(rdoAnswer2);
             Controls.Add(rdoAnswer1);
-            Controls.Add(lblWord);
+            Controls.Add(lblQuestion);
             Controls.Add(grpMode);
             Name = "Kiemtra";
             Size = new Size(948, 473);
@@ -222,7 +212,7 @@
         private RadioButton rdoMixed;
         private RadioButton rdoFillInTheBlank;
         private RadioButton rdoMultipleChoice;
-        private Label lblWord;
+        private Label lblQuestion;
         private RadioButton rdoAnswer1;
         private RadioButton rdoAnswer2;
         private RadioButton rdoAnswer3;
@@ -231,8 +221,63 @@
         private ProgressBar progressBar;
         private Label lblResult;
         private TextBox txtAnswer;  // Thêm TextBox để người dùng nhập đáp án
-        private Label lblQuestion;  // Thêm Label để hiển thị câu hỏi
         private CheckedListBox clbTopics;
         private RadioButton rdoAnswer4;
+
+        // Phương thức sự kiện cho các RadioButton và Button
+        private void btnCheck_Click(object sender, EventArgs e)
+        {
+            var question = filteredQuestions[currentQuestionIndex];
+            string selectedAnswer = null;
+
+            if (question.IsFillInTheBlank)
+            {
+                selectedAnswer = txtAnswer.Text.Trim();
+            }
+            else
+            {
+                if (rdoAnswer1.Checked) selectedAnswer = rdoAnswer1.Text;
+                if (rdoAnswer2.Checked) selectedAnswer = rdoAnswer2.Text;
+                if (rdoAnswer3.Checked) selectedAnswer = rdoAnswer3.Text;
+                if (rdoAnswer4.Checked) selectedAnswer = rdoAnswer4.Text;
+            }
+
+            // Kiểm tra nếu không có câu trả lời
+            if (string.IsNullOrWhiteSpace(selectedAnswer))
+            {
+                lblResult.Text = "Vui lòng chọn một đáp án!";
+                lblResult.ForeColor = System.Drawing.Color.Orange;
+                return;
+            }
+
+            // Kiểm tra đáp án
+            if (selectedAnswer.Equals(question.CorrectAnswer, StringComparison.OrdinalIgnoreCase))
+            {
+                lblResult.Text = "Đúng!";
+                lblResult.ForeColor = System.Drawing.Color.Green; // Hiển thị kết quả đúng
+            }
+            else
+            {
+                lblResult.Text = "Sai! Đáp án đúng là: " + question.CorrectAnswer;
+                lblResult.ForeColor = System.Drawing.Color.Red; // Hiển thị kết quả sai và đáp án đúng
+            }
+        }
+
+
+
+        private void rdoMixed_CheckedChanged(object sender, EventArgs e)
+        {
+            // Logic xử lý khi radio button 'Tổng hợp' thay đổi
+        }
+
+        private void rdoFillInTheBlank_CheckedChanged(object sender, EventArgs e)
+        {
+            // Logic xử lý khi radio button 'Điền từ' thay đổi
+        }
+
+        private void rdoMultipleChoice_CheckedChanged(object sender, EventArgs e)
+        {
+            // Logic xử lý khi radio button 'Trắc nghiệm' thay đổi
+        }
     }
 }
